@@ -1,0 +1,3 @@
+include ':generic'
+include ':app'
+rootProject.name = "Generic"
