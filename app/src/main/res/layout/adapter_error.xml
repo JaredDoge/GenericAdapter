@@ -7,6 +7,7 @@
 
 
     <TextView
+        android:id="@+id/tv_error"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -16,6 +17,17 @@
         android:textSize="30sp"
         android:text="Error"
         android:textColor="@android:color/white"
+        />
+
+    <Button
+        android:id="@+id/btn_retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_error"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:text="retry"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
