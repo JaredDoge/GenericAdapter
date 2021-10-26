@@ -112,7 +112,7 @@ open class GenericAdapter<T>() :
                 v.setOnClickListener {
                     binder.onClick(it)
                 }
-                binder.onCreateView(holder.view, parent)
+                binder.onCreateView(holder,holder.view,parent)
                 return holder
             }
 
@@ -204,7 +204,7 @@ open class GenericAdapter<T>() :
 
             is ViewStateHolder -> {
                 val binder = getViewTypeBinder(getItemViewType(position))
-                binder.onBind(holder.view)
+                binder.onBind(holder,holder.view)
             }
 
         }
@@ -286,11 +286,11 @@ open class GenericAdapter<T>() :
         viewStateBinders.put(state, object : ViewStateBinder() {
             override fun getLayoutId(): Int = layoutId
 
-            override fun onBind(view: View) = eb.mBind(view)
+            override fun onBind(holder: ViewStateHolder, view: View) = eb.mBind(holder,view)
 
             override fun onClick(v: View) = eb.mClick(v)
 
-            override fun onCreateView(view: View, parent: ViewGroup) = eb.mCreate(view, parent)
+            override fun onCreateView(holder: ViewStateHolder, view: View, parent: ViewGroup) = eb.mCreate(holder,view, parent)
 
         })
     }
@@ -540,11 +540,11 @@ open class GenericAdapter<T>() :
 
         abstract fun getLayoutId(): Int
 
-        open fun onCreateView(view: View, parent: ViewGroup) {}
+        open fun onCreateView(holder: ViewStateHolder, view: View, parent: ViewGroup) {}
 
         open fun onClick(v: View) {}
 
-        open fun onBind(view: View) {}
+        open fun onBind(holder:ViewStateHolder,view: View) {}
 
 
     }
@@ -614,20 +614,22 @@ open class GenericAdapter<T>() :
 
 
     inner class ViewStateBuilder {
-        internal var mCreate: (v: View, p: ViewGroup) -> Unit = { _: View, _: ViewGroup -> }
+        internal var mCreate: (holder: ViewStateHolder,v: View, p: ViewGroup) -> Unit = { _: ViewStateHolder,_: View, _: ViewGroup -> }
         internal var mClick: (v: View) -> Unit = { _: View -> }
-        internal var mBind: (v: View) -> Unit = { _: View -> }
-        fun onBindView(bind: (v: View) -> Unit) {
+        internal var mBind: (holder: ViewStateHolder,v: View) -> Unit = { _:ViewStateHolder ,_: View -> }
+        fun onBindView(bind: (holder:ViewStateHolder,v: View) -> Unit) {
             mBind = bind
         }
 
-        fun onCreateView(create: (v: View, p: ViewGroup) -> Unit) {
+        fun onCreateView(create: (holder: ViewStateHolder,v: View, p: ViewGroup) -> Unit) {
             mCreate = create
         }
 
         fun onViewClick(click: (v: View) -> Unit) {
             mClick = click
         }
+
+
     }
 
 

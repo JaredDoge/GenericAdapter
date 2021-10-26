@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,7 +46,14 @@ class MainActivity : AppCompatActivity() {
             //當dataList size為0時 會自動顯示emptyView
             .emptyBinder(R.layout.adapter_empty)
             //當要顯示errorView時需手動setState(GenericAdapter.State.ERROR)
-            .errorBinder(R.layout.adapter_error)
+            .errorBinder(R.layout.adapter_error){
+                onBindView { holder, v ->
+                    val btn:Button = holder.find(R.id.btn_retry)
+                    btn.setOnClickListener {
+                        adapter.submitList(getData())
+                    }
+                }
+            }
             //當要顯示loadingView時需手動setState(GenericAdapter.State.LOADING)
             .loadingBinder(R.layout.adapter_loading)
 
