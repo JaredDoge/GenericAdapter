@@ -453,7 +453,7 @@ open class GenericAdapter<T>() :
     }
 
 
-    fun update(newDataList: List<T>): GenericAdapter<T> {
+    private fun update(newDataList: List<T>): GenericAdapter<T> {
 
         dataList.clear()
         dataList.addAll(newDataList)
