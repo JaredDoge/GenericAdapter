@@ -4,22 +4,22 @@
 Easy RecyclerView Adapter
 # Getting started
 build.gradle
-```
+```build.gradle
 allprojects {
     repositories {
-        ...
+        // ...
         maven { url 'https://jitpack.io' }
     }
 }
 ```
-```
+```build.gradle
 dependencies {
 	        implementation 'com.github.JaredDoge:GenericAdapter:{latest_version}'
 	}
 ```
 # Usage
-kotlin
-```
+
+```kotlin
    recyclerview.layoutManager = LinearLayoutManager(context)
 
    adapter= GenericAdapter(list)
@@ -38,7 +38,7 @@ kotlin
 ```
 # MultiType
 SampleModel
-```
+```kotlin
 sealed class Data {
 
     data class Type1(val t1: String) : Data()
@@ -47,7 +47,7 @@ sealed class Data {
 }
 ```
 Adaptaer
-```
+```kotlin
  adapter= GenericAdapter(list)
             .setTypeCondition { pos, obj ->
             
@@ -74,9 +74,9 @@ Adaptaer
 ```
 #State
 提供三種狀態error、empty、loading顯示的畫面
-```
+```kotlin
 GenericAdapter(list)
-   ...
+   // ...
    .emptyBinder(R.layout.adapter_empty)//當dataList size為0時 會自動顯示emptyView
    
    .errorBinder(R.layout.adapter_error){//當要顯示errorView時需手動setState(GenericAdapter.State.ERROR)
@@ -90,7 +90,7 @@ GenericAdapter(list)
    .loadingBinder(R.layout.adapter_loading)//當要顯示loadingView時需手動setState(GenericAdapter.State.LOADING)
 ```
 # LoadMore
-```
+```kotlin
 adapter.getLoadMore().setListener(
             object :LoadMore.Callback{
                 override fun more() {
@@ -103,28 +103,28 @@ adapter.getLoadMore().setListener(
         )
 ```
 何時載入更多?
-```
+```kotlin
 adapter.getLoadMore().prefetchDistance(5)//還剩多少的item時載入更多，預設為0(到最底才載入)
 ```
 載入前，呼叫lock()，防止多次上滑載入
-```
+```kotlin
 adapter.getLoadMore().lock()
 ```
 載入完，呼叫unlock()，如果已經完全載入完成則不必呼叫。
-```
+```kotlin
 adapter.getLoadMore().unlock()
 ```
 # Submit
 呼叫adapter.submitList()更新data，內部實現DiffUtil計算出兩個列表間差異，自動實現非全量更新。
-```
+```kotlin
 adapter.submitList(getData())
 ```
 當然，你也可以使用原生的更新方式
-```
+```kotlin
 notifyItemChanged(int)
 notifyItemInserted(int)
 notifyItemRemoved(int)
-...
+// etc...
 ```
 
 
