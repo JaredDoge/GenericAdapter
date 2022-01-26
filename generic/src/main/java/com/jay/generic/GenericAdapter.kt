@@ -14,7 +14,7 @@ import com.jay.generic.more.LoadMoreListenerImpl
 
 
 open class GenericAdapter<T>() :
-        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         const val TAG = "GenericAdapter"
         private const val VIEW_TYPE_EMPTY = -1
@@ -77,7 +77,10 @@ open class GenericAdapter<T>() :
 
     constructor(list: List<T>) : this() {
         if (list.isNotEmpty()) {
+            inState = InState.NORMAL
             dataList.addAll(list)
+        }else{
+            inState = InState.EMPTY
         }
         dataLoaded = true
     }
@@ -107,12 +110,12 @@ open class GenericAdapter<T>() :
             -> {
                 val binder = getViewTypeBinder(viewType)
                 val v = LayoutInflater.from(parent.context)
-                        .inflate(binder.getLayoutId(), parent, false)
+                    .inflate(binder.getLayoutId(), parent, false)
                 val holder = ViewStateHolder(v)
                 v.setOnClickListener {
                     binder.onClick(it)
                 }
-                binder.onCreateView(holder,holder.view,parent)
+                binder.onCreateView(holder, holder.view, parent)
                 return holder
             }
 
@@ -120,20 +123,20 @@ open class GenericAdapter<T>() :
                 val binder = getBinder(viewType)
 
                 val v =
-                        LayoutInflater.from(parent.context).inflate(binder.getLayoutId(), parent, false)
+                    LayoutInflater.from(parent.context).inflate(binder.getLayoutId(), parent, false)
                 val holder =
-                        LayoutHolder(v)
+                    LayoutHolder(v)
                 v.setOnClickListener {
 
                     binder.handleClick(
-                            holder.layoutPosition,
-                            it,
-                            getDataList()[holder.layoutPosition]
+                        holder.layoutPosition,
+                        it,
+                        getDataList()[holder.layoutPosition]
                     )
                     postClick(
-                            holder.view,
-                            holder.layoutPosition,
-                            getDataList()[holder.layoutPosition]
+                        holder.view,
+                        holder.layoutPosition,
+                        getDataList()[holder.layoutPosition]
                     )
                 }
                 binder.onCreateView(holder, holder.view, parent, viewType)
@@ -149,27 +152,27 @@ open class GenericAdapter<T>() :
 
     private fun getBinder(viewType: Int): TypeBinder<*> {
         return binders.singleOrNull { it.getViewType() == viewType }
-                ?: throw IllegalArgumentException(
-                        "viewType '${viewType}' not found " +
-                                ",If it is multi-type, you must call setTypeCondition() and  override getViewType()"
-                )
+            ?: throw IllegalArgumentException(
+                "viewType '${viewType}' not found " +
+                        ",If it is multi-type, you must call setTypeCondition() and  override getViewType()"
+            )
     }
 
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
     private fun getViewTypeBinder(viewType: Int): ViewStateBinder {
         return viewStateBinders[viewType]
-                ?: throw NullPointerException(
-                        "state '${
-                            when (viewType) {
-                                VIEW_TYPE_EMPTY -> "EMPTY"
-                                VIEW_TYPE_ERROR -> "ERROR"
-                                VIEW_TYPE_LOADING -> "LOADING"
-                                else -> viewType
-                            }
-                        }' not found " +
-                                ",Did you forget to bind?"
-                )
+            ?: throw NullPointerException(
+                "state '${
+                    when (viewType) {
+                        VIEW_TYPE_EMPTY -> "EMPTY"
+                        VIEW_TYPE_ERROR -> "ERROR"
+                        VIEW_TYPE_LOADING -> "LOADING"
+                        else -> viewType
+                    }
+                }' not found " +
+                        ",Did you forget to bind?"
+            )
     }
 
 
@@ -186,25 +189,27 @@ open class GenericAdapter<T>() :
     }
 
     override fun onBindViewHolder(
-            holder: RecyclerView.ViewHolder,
-            position: Int,
-            payloads: MutableList<Any>,
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>,
     ) {
 
         when (holder) {
             is LayoutHolder -> {
                 val binder = getBinder(getItemViewType(position))
 
-                    binder.handleBindPayload(holder,
-                            holder.view,
-                            position,
-                            getDataList()[position],
-                            payloads)
+                binder.handleBindPayload(
+                    holder,
+                    holder.view,
+                    position,
+                    getDataList()[position],
+                    payloads
+                )
             }
 
             is ViewStateHolder -> {
                 val binder = getViewTypeBinder(getItemViewType(position))
-                binder.onBind(holder,holder.view)
+                binder.onBind(holder, holder.view)
             }
 
         }
@@ -212,18 +217,12 @@ open class GenericAdapter<T>() :
     }
 
 
-   override fun getItemCount(): Int
+    override fun getItemCount(): Int
     //資料如果已經載入，並且list 為空
-            = when {
-        inState == InState.LOADING || inState == InState.ERROR -> 1
-        checkEmptyState() -> {
-            inState = InState.EMPTY
-            1
-        }
-        else -> {
-            inState = InState.NORMAL
-            getDataList().size
-        }
+     = if (inState != InState.NORMAL) {
+        1
+    } else {
+        getDataList().size
     }
 
 
@@ -238,8 +237,8 @@ open class GenericAdapter<T>() :
     }
 
 
-    private fun checkEmptyState() =
-            dataLoaded && getDataList().isEmpty() && viewStateBinders.containsKey(VIEW_TYPE_EMPTY)
+//    private fun checkEmptyState() =
+//        dataLoaded && getDataList().isEmpty()
 
 
     private fun <TYPE> addTypeBinder(
@@ -268,7 +267,8 @@ open class GenericAdapter<T>() :
                 viewType: Int,
             ) = create(holder, view, parent, viewType)
 
-            override fun onClick(position: Int, view: View, data: TYPE) = click(position, view, data)
+            override fun onClick(position: Int, view: View, data: TYPE) =
+                click(position, view, data)
 
         })
 
@@ -286,11 +286,12 @@ open class GenericAdapter<T>() :
         viewStateBinders.put(state, object : ViewStateBinder() {
             override fun getLayoutId(): Int = layoutId
 
-            override fun onBind(holder: ViewStateHolder, view: View) = eb.mBind(holder,view)
+            override fun onBind(holder: ViewStateHolder, view: View) = eb.mBind(holder, view)
 
             override fun onClick(v: View) = eb.mClick(v)
 
-            override fun onCreateView(holder: ViewStateHolder, view: View, parent: ViewGroup) = eb.mCreate(holder,view, parent)
+            override fun onCreateView(holder: ViewStateHolder, view: View, parent: ViewGroup) =
+                eb.mCreate(holder, view, parent)
 
         })
     }
@@ -401,8 +402,8 @@ open class GenericAdapter<T>() :
 
             if (binders.any { it.getViewType() == b.getViewType() }) {
                 throw IllegalArgumentException(
-                        "viewType '${b.getViewType()}' is exist " +
-                                ", you must override getViewType() and use different types"
+                    "viewType '${b.getViewType()}' is exist " +
+                            ", you must override getViewType() and use different types"
                 )
             }
         }
@@ -410,7 +411,7 @@ open class GenericAdapter<T>() :
         return this
     }
 
-    fun getBinders():List<TypeBinder<*>> = binders
+    fun getBinders(): List<TypeBinder<*>> = binders
 
     fun addItemClick(c: (view: View, position: Int, data: T) -> Unit): GenericAdapter<T> {
         addItemClick(object :
@@ -434,15 +435,17 @@ open class GenericAdapter<T>() :
     }
 
     fun submitList(
-            newDataList: List<T>,
-            detectMoves: Boolean = this.detectMoves ?: false,
+        newDataList: List<T>,
+        detectMoves: Boolean = this.detectMoves ?: false,
     ): GenericAdapter<T> {
+
         if (inState != InState.NORMAL || !dataLoaded) {
             update(newDataList)
         } else {
-         //   loadMoreCheckIsLoadFinish(newDataList)
+            //   loadMoreCheckIsLoadFinish(newDataList)
             dataLoaded = true
-            inState = InState.NORMAL
+
+            inState = if (newDataList.isEmpty()) InState.EMPTY else InState.NORMAL
 
             DiffUtil.calculateDiff(diffCallback(dataList, newDataList), detectMoves).apply {
                 dataList.clear()
@@ -461,7 +464,7 @@ open class GenericAdapter<T>() :
         dataList.addAll(newDataList)
 
         dataLoaded = true
-        inState = InState.NORMAL
+        inState = if (newDataList.isEmpty()) InState.EMPTY else InState.NORMAL
         notifyDataSetChanged()
         return this
     }
@@ -500,11 +503,11 @@ open class GenericAdapter<T>() :
 
     class ViewStateHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
-        private val viewMap: MutableMap<Int,View> = mutableMapOf()
+        private val viewMap: MutableMap<Int, View> = mutableMapOf()
 
         var payload: Any? = null
 
-        fun <V:View> find(id: Int): V {
+        fun <V : View> find(id: Int): V {
             var v = viewMap[id]
 
             if (v != null) return v as V
@@ -519,12 +522,12 @@ open class GenericAdapter<T>() :
 
     class LayoutHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
-        private val viewMap: MutableMap<Int,View> = mutableMapOf()
+        private val viewMap: MutableMap<Int, View> = mutableMapOf()
 
         var payload: Any? = null
 
 
-        fun <V:View> find(id: Int): V {
+        fun <V : View> find(id: Int): V {
             var v = viewMap[id]
 
             if (v != null) return v as V
@@ -546,7 +549,7 @@ open class GenericAdapter<T>() :
 
         open fun onClick(v: View) {}
 
-        open fun onBind(holder:ViewStateHolder,view: View) {}
+        open fun onBind(holder: ViewStateHolder, view: View) {}
 
 
     }
@@ -562,7 +565,13 @@ open class GenericAdapter<T>() :
 
         open fun onClick(position: Int, view: View, data: TYPE) {}
 
-        open fun onBind(holder: LayoutHolder, view: View, position: Int, data: TYPE, payloads: MutableList<Any>) {
+        open fun onBind(
+            holder: LayoutHolder,
+            view: View,
+            position: Int,
+            data: TYPE,
+            payloads: MutableList<Any>
+        ) {
 
         }
 
@@ -578,25 +587,27 @@ open class GenericAdapter<T>() :
         }
 
 
-
     }
 
     inner class TypeBuilder<TYPE> {
         internal var mType: Int = 0
 
         internal var mCreate: (holder: LayoutHolder, v: View, p: ViewGroup, vt: Int) -> Unit =
-                { _: LayoutHolder, _: View, _: ViewGroup, _: Int -> }
+            { _: LayoutHolder, _: View, _: ViewGroup, _: Int -> }
 
         internal var mClick: (pos: Int, v: View, da: TYPE) -> Unit = { _: Int, _: View, _: TYPE -> }
 
 
-
         internal var mBind: (h: LayoutHolder, v: View, pos: Int, da: TYPE, payloads: MutableList<Any>) -> Unit =
-                { _: LayoutHolder, _: View, _: Int, _: TYPE, _: MutableList<Any> -> }
+            { _: LayoutHolder, _: View, _: Int, _: TYPE, _: MutableList<Any> -> }
 
 
-        fun onBindView(bind: (holder: LayoutHolder, view: View, pos: Int, data: TYPE,
-                                        payloads: MutableList<Any>) -> Unit) {
+        fun onBindView(
+            bind: (
+                holder: LayoutHolder, view: View, pos: Int, data: TYPE,
+                payloads: MutableList<Any>
+            ) -> Unit
+        ) {
             mBind = bind
         }
 
@@ -616,14 +627,17 @@ open class GenericAdapter<T>() :
 
 
     inner class ViewStateBuilder {
-        internal var mCreate: (holder: ViewStateHolder,v: View, p: ViewGroup) -> Unit = { _: ViewStateHolder,_: View, _: ViewGroup -> }
+        internal var mCreate: (holder: ViewStateHolder, v: View, p: ViewGroup) -> Unit =
+            { _: ViewStateHolder, _: View, _: ViewGroup -> }
         internal var mClick: (v: View) -> Unit = { _: View -> }
-        internal var mBind: (holder: ViewStateHolder,v: View) -> Unit = { _:ViewStateHolder ,_: View -> }
-        fun onBindView(bind: (holder:ViewStateHolder,v: View) -> Unit) {
+        internal var mBind: (holder: ViewStateHolder, v: View) -> Unit =
+            { _: ViewStateHolder, _: View -> }
+
+        fun onBindView(bind: (holder: ViewStateHolder, v: View) -> Unit) {
             mBind = bind
         }
 
-        fun onCreateView(create: (holder: ViewStateHolder,v: View, p: ViewGroup) -> Unit) {
+        fun onCreateView(create: (holder: ViewStateHolder, v: View, p: ViewGroup) -> Unit) {
             mCreate = create
         }
 
@@ -650,10 +664,10 @@ open class GenericAdapter<T>() :
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return itemsTheSame(
-                    oldList[oldItemPosition],
-                    newList[newItemPosition],
-                    oldItemPosition,
-                    newItemPosition
+                oldList[oldItemPosition],
+                newList[newItemPosition],
+                oldItemPosition,
+                newItemPosition
             )
         }
 
@@ -663,12 +677,12 @@ open class GenericAdapter<T>() :
         override fun getNewListSize(): Int = newList.size
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                contentsTheSame(
-                        oldList[oldItemPosition],
-                        newList[newItemPosition],
-                        oldItemPosition,
-                        newItemPosition
-                )
+            contentsTheSame(
+                oldList[oldItemPosition],
+                newList[newItemPosition],
+                oldItemPosition,
+                newItemPosition
+            )
 
     }
 

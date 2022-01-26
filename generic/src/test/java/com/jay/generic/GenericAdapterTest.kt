@@ -103,9 +103,9 @@ internal class GenericAdapterTest {
         adapter.setState(GenericAdapter.State.LOADING)
         assertThat(adapter.itemCount).isEqualTo(1)
 
-//        //empty
-//        adapter.submitList(mutableListOf())
-//        assertThat(adapter.itemCount).isEqualTo(0)
+        //empty
+        adapter.submitList(mutableListOf())
+        assertThat(adapter.itemCount).isEqualTo(1)
 
     }
 
@@ -125,7 +125,7 @@ internal class GenericAdapterTest {
 
         //empty
         multiAdapter.submitList(mutableListOf())
-        assertThat(multiAdapter.itemCount).isEqualTo(0)
+        assertThat(multiAdapter.itemCount).isEqualTo(1)
 
     }
 
@@ -147,9 +147,9 @@ internal class GenericAdapterTest {
         assertThat(typeLoad).isEqualTo(-2)
 
         //empty
-//        adapter.submitList(mutableListOf())
-//        val typeEmpty=adapter.getItemViewType(0)
-//        assertThat(typeEmpty).isEqualTo(-1)
+        adapter.submitList(mutableListOf())
+        val typeEmpty=adapter.getItemViewType(0)
+        assertThat(typeEmpty).isEqualTo(-1)
     }
 
     @Test
@@ -169,9 +169,9 @@ internal class GenericAdapterTest {
         assertThat(typeLoad).isEqualTo(-2)
 
         //empty
-//        multiAdapter.submitList(mutableListOf())
-//        val typeEmpty=multiAdapter.getItemViewType(0)
-//        assertThat(typeEmpty).isEqualTo(-1)
+        multiAdapter.submitList(mutableListOf())
+        val typeEmpty=multiAdapter.getItemViewType(0)
+        assertThat(typeEmpty).isEqualTo(-1)
     }
 
     @Test
