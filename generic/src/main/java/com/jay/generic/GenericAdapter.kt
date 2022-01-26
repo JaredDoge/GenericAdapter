@@ -212,7 +212,7 @@ open class GenericAdapter<T>() :
     }
 
 
-    override fun getItemCount(): Int
+   override fun getItemCount(): Int
     //資料如果已經載入，並且list 為空
             = when {
         inState == InState.LOADING || inState == InState.ERROR -> 1
@@ -409,6 +409,8 @@ open class GenericAdapter<T>() :
         binders.addAll(binder)
         return this
     }
+
+    fun getBinders():List<TypeBinder<*>> = binders
 
     fun addItemClick(c: (view: View, position: Int, data: T) -> Unit): GenericAdapter<T> {
         addItemClick(object :
